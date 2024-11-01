@@ -36,11 +36,11 @@ class Mail extends Base
      * Constructor
      * @param \stdClass $config
      */
-    public function __construct(\stdClass $config, PHPMailer $mailer = null)
+    public function __construct(\stdClass $config, $mailer = null)
     {
         $this->mail = $mailer;
         if (is_null($mailer)) {
-            $this->mail = new PHPMailer();
+            $this->mail = new \PHPMailer\PHPMailer\PHPMailer();
         }
         $this->config = $config;
         $this->loadService($config);
@@ -62,15 +62,17 @@ class Mail extends Base
     protected function loadService(\stdClass $config)
     {
         $this->mail->CharSet = 'UTF-8';
-        $this->mail->isSMTP();
-        $this->mail->Host = $config->host;
-        $this->mail->SMTPAuth = true;
-        $this->mail->Username = $config->user;
-        $this->mail->Password = $config->password;
-        $this->mail->SMTPSecure = $config->secure;
-        $this->mail->Port = $config->port;
-        $this->mail->setFrom($config->from, $config->fantasy);
-        $this->mail->addReplyTo($config->replyTo, $config->replyName);
+        if (!$config->AuthType == 'google') {
+            $this->mail->isSMTP();
+            $this->mail->Host = $config->host;
+            $this->mail->SMTPAuth = true;
+            $this->mail->Username = $config->user;
+            $this->mail->Password = $config->password;
+            $this->mail->SMTPSecure = $config->secure;
+            $this->mail->Port = $config->port;
+            $this->mail->setFrom($config->from, $config->fantasy);
+            $this->mail->addReplyTo($config->replyTo, $config->replyName);
+        }
     }
 
     /**
@@ -194,7 +196,7 @@ class Mail extends Base
         //xml may be a NFe or a CTe or a CCe nothing else
         if ($type != 'NFe' && $type != 'CTe' && $type != 'CCe') {
             $msg = "Você deve passar apenas uma NFe ou um CTe ou um CCe. "
-                    . "Esse documento não foi reconhecido.";
+                . "Esse documento não foi reconhecido.";
             throw new \InvalidArgumentException($msg);
         }
         $this->type = $type;
@@ -263,7 +265,7 @@ class Mail extends Base
         $pdf = '',
         array $addresses = [],
         $htmltemplate = '',
-        PHPMailer $mailer = null
+        \PHPMailer\PHPMailer\PHPMailer $mailer = null
     ) {
         $mail = new static($config, $mailer);
         $mail->loadDocuments($xml, $pdf);
